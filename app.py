@@ -9,6 +9,7 @@ def random_algorithm(size):
 def apply_algorithm(cube, algorithm):
     for move in algorithm:
         cube = rc.apply(cube, move)
+        print(cube)
     return cube
 
 def integrity_check(data):
@@ -16,9 +17,9 @@ def integrity_check(data):
     return data.count(0) == 9 and data.count(1) == 9 and data.count(2) == 9 and data.count(3) == 9 and data.count(4) == 9 and data.count(5) == 9
 
 r = rc.solved
+scramble = random_algorithm(20)
+print(scramble)
 
-r = apply_algorithm(r, random_algorithm(20))
+r = apply_algorithm(r, scramble)
 
 assert integrity_check(r)
-
-rc.print_cube(r)

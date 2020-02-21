@@ -1,12 +1,10 @@
 #!/usr/bin/python3
 from typing import List
-import numpy as np
-
+import numpy as np 
 def concat(arr):
     return np.vstack([np.hstack(row) for row in arr])
 
-def apply(cube, f):
-    return np.dot(r[f], cube)
+def apply(cube, f): return np.dot(r[f], cube)
 
 def getFace(cube, f):
     return cube[9 * f:9 * (f + 1)]
@@ -19,6 +17,14 @@ def print_cube(cube):
     for i in range(6):
         printFace(getFace(cube, i))
         print()
+
+def fitness(r):
+    out = 0
+    for i in range(6):
+        face = r.getFace(i)
+        for j in face:
+            out += 1 if i == j else 0
+    return out
 
 solved = [int(i/9) for i in range(54)]
 
@@ -97,10 +103,10 @@ r[2] = concat([[b,z,z,z,z,d],
                [z,z,z,z,i,z],
                [z,f,z,z,z,e]])
 
-a = np.vstack([np.zeros([6, 9]), c[-3:]]) # right to bottom
-b = np.hstack([np.zeros([9, 6]), c[:, -3:]]) # bottom to left
-d = np.vstack([c[:3], np.zeros([6, 9])]) # left to top
-e = np.hstack([c[:, :3], np.zeros([9, 6])])# top to right
+a = np.vstack([np.zeros([6, 9], dtype=int), c[-3:]]) # right to bottom
+b = np.hstack([np.zeros([9, 6], dtype=int), c[:, -3:]]) # bottom to left
+d = np.vstack([c[:3], np.zeros([6, 9], dtype=int)]) # left to top
+e = np.hstack([c[:, :3], np.zeros([9, 6], dtype=int)])# top to right
 
 f = np.diag([0,1,1,0,1,1,0,1,1])# not left
 g = np.diag([1,1,0,1,1,0,1,1,0])# not right
@@ -129,10 +135,10 @@ r[4] = concat([[b,z,z,a,z,z],
 
 k = np.dot(c, np.dot(c, c))
 
-a = np.vstack([np.zeros([6, 9]), k[-3:]]) # left to bottom
-b = np.hstack([np.zeros([9, 6]), k[:, -3:]]) # bottom to right
-d = np.vstack([k[:3], np.zeros([6, 9])]) # right to top
-e = np.hstack([k[:, :3], np.zeros([9, 6])])# top to left
+a = np.vstack([np.zeros([6, 9], dtype=int), k[-3:]]) # left to bottom
+b = np.hstack([np.zeros([9, 6], dtype=int), k[:, -3:]]) # bottom to right
+d = np.vstack([k[:3], np.zeros([6, 9], dtype=int)]) # right to top
+e = np.hstack([k[:, :3], np.zeros([9, 6], dtype=int)])# top to left
 
 f = np.diag([0,1,1,0,1,1,0,1,1])# not left
 g = np.diag([1,1,0,1,1,0,1,1,0])# not right

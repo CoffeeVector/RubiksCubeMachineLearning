@@ -3,11 +3,22 @@
 from typing import Dict
 import RubiksCube as rc
 import numpy as np
+import random as rand
+
+def random_algorithm(size):
+    out = [rand.randint(-6, 5) for _ in range(size)]
+    return out
+
+def apply_algorithm(cube, algorithm):
+    for move in algorithm:
+        cube = rc.apply(cube, move)
+    return cube
 
 r = rc.solved
 
-scramble = rc.randomAlgorithm(20)
-r = rc.apply_algo(scramble, r)
+scramble = random_algorithm(20)
+
+r = apply_algorithm(r, scramble)
 
 unsearched = {}
 searched = {}
@@ -19,7 +30,7 @@ def searchone(unsearched: Dict[str, str], searched: Dict[str, str]):
     data = np.array([int(i) for i in list(data_str)])
     for move in range(-6, 6):
         tryAlgo = algo + str(move) + ","
-        r_new = rc.rotate(data, move)
+        r_new = rc.apply(data, move)
         r_new_str = "".join(str(i) for i in r_new)
         algo_len = len(tryAlgo.split(',')) - 1
 
