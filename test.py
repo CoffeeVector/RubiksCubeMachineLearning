@@ -34,7 +34,6 @@ def searchone(unsearched: Dict[str, str], searched: Dict[str, str]):
 def integrity_check(data: list):
     return data.count(0) == 9 and data.count(1) == 9 and data.count(2) == 9 and data.count(3) == 9 and data.count(4) == 9 and data.count(5) == 9
 
-
 for _ in range(1000):
     searched, unsearched = searchone(unsearched, searched)
     algo, data_str = max(unsearched.items(), key= lambda kv: rc.fitness([int(i) for i in list(kv[1])]))
