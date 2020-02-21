@@ -1,42 +1,24 @@
 #!/usr/bin/python3
+import RubiksCube as rc
+import random as rand
 
-# Color reference:
-# white: 0
-# yellow: 1
-# green: 2
-# red: 3
-# blue: 4
-# orange: 5
+def random_algorithm(size):
+    out = [rand.randint(-6, 5) for _ in range(size)]
+    return out
 
-# Face reference:
-# top: 0
-# bottom: 1
-# left: 2
-# front: 3
-# right: 4
-# back: 5
+def apply_algorithm(cube, algorithm):
+    for move in algorithm:
+        cube = rc.apply(cube, move)
+    return cube
 
-# Matrix responsible for rotating the rubiks cube face
-c = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0],
-                 [0, 0, 0, 1, 0, 0, 0, 0, 0],
-                 [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 0, 0, 0, 0, 0, 0, 1, 0],
-                 [0, 0, 0, 0, 1, 0, 0, 0, 0],
-                 [0, 1, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 0, 0, 0, 0, 0, 0, 0, 1],
-                 [0, 0, 0, 0, 0, 1, 0, 0, 0],
-                 [0, 0, 1, 0, 0, 0, 0, 0, 0]])
-f = 0 # face
+def integrity_check(data):
+    data = data.tolist()
+    return data.count(0) == 9 and data.count(1) == 9 and data.count(2) == 9 and data.count(3) == 9 and data.count(4) == 9 and data.count(5) == 9
 
-z = np.zeros(9, 9)
-i = np.identity(9)
+r = rc.solved
 
-if f == 0:
-    cwf = np.vstack([
-              np.hstack([c,z,z,z,z,z]),
-              np.hstack([z,i,z,z,z,z]),
-              np.hstack([z,z,i,z,z,z]),
-              np.hstack([z,z,z,i,z,z]),
-              np.hstack([z,z,z,z,i,z]),
-              np.hstack([z,z,z,z,z,i]),
-          ])
+r = apply_algorithm(r, random_algorithm(20))
+
+assert integrity_check(r)
+
+rc.print_cube(r)

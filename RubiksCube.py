@@ -1,6 +1,26 @@
-# Rubiks Cube with white facing up and red facing towards the POV
+#!/usr/bin/python3
+from typing import List
 import numpy as np
-import random as r
+
+def concat(arr):
+    return np.vstack([np.hstack(row) for row in arr])
+
+def apply(cube, f):
+    return np.dot(r[f], cube)
+
+def getFace(cube, f):
+    return cube[9 * f:9 * (f + 1)]
+
+def printFace(v):
+    for i in range(3):
+        print(v[i * 3:i * 3 + 3])
+
+def print_cube(cube):
+    for i in range(6):
+        printFace(getFace(cube, i))
+        print()
+
+solved = [int(i/9) for i in range(54)]
 
 # Color reference:
 # white: 0
@@ -18,349 +38,113 @@ import random as r
 # right: 4
 # back: 5
 
+# sticker reference
+
+"""
+abc
+def  -> abcdefxyz
+xyz
+"""
+
+
 # Matrix responsible for rotating the rubiks cube face
-clockwiseRotationFace = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0],
-                                  [0, 0, 0, 1, 0, 0, 0, 0, 0],
-                                  [1, 0, 0, 0, 0, 0, 0, 0, 0],
-                                  [0, 0, 0, 0, 0, 0, 0, 1, 0],
-                                  [0, 0, 0, 0, 1, 0, 0, 0, 0],
-                                  [0, 1, 0, 0, 0, 0, 0, 0, 0],
-                                  [0, 0, 0, 0, 0, 0, 0, 0, 1],
-                                  [0, 0, 0, 0, 0, 1, 0, 0, 0],
-                                  [0, 0, 1, 0, 0, 0, 0, 0, 0]])
-
-solved = np.array([(int) (i / 9)for i in range(54)])
-
-def getFace(arr, f):
-    return arr[9 * f:9 * (f + 1)]
-
-def getColor(arr, f, y, x):
-    if x >= 3 or x < 0 or y >= 3 or y < 0 or f >= 5 or f < 0:
-        raise ValueError("Input invalid")
-    else:
-        return getFace(arr, f)[y * 3 + x]
-
-def toIndex(face, y, x):
-    return face * 9 + y * 3 + x
-
-def fitness(arr):
-    return sum([1 if d == t else 0 for d,t in zip(arr, [((int)(i/9))for i in range(54)])])
-
-# Set of 12 matrices, each representing each of the possible moves
-rotationMatrices = [None] * 12
-
-for f in range(6):
-    rotation = [[1 if i == j else 0 for j in range(54)] for i in range(54)]  # I_54 matrix ( identity matrix )
-    # Add the matrix that rotates the face that's desired by offsetting it
-    for i in range(9 * f, 9 * (f + 1)): # the row vectors that correspond to that face
-        rotation[i] = [ 0 if j < 9 * f or j >= 9 * (f + 1) else clockwiseRotationFace[i - 9 * f][j - 9 * f] for j in range(54) ]
-
-    if f == 0:
-        # Replace left with front
-        rotation[toIndex(2, 0, 0)][toIndex(3, 0, 0)] = 1  # Add the 1 that does the operation
-        rotation[toIndex(2, 0, 0)][toIndex(2, 0, 0)] = 0  # Remove the 1 from the identity matrix prior
-
-        rotation[toIndex(2, 0, 1)][toIndex(3, 0, 1)] = 1
-        rotation[toIndex(2, 0, 1)][toIndex(2, 0, 1)] = 0
-
-        rotation[toIndex(2, 0, 2)][toIndex(3, 0, 2)] = 1
-        rotation[toIndex(2, 0, 2)][toIndex(2, 0, 2)] = 0
-
-        # Replace front with right
-        rotation[toIndex(3, 0, 0)][toIndex(4, 0, 0)] = 1
-        rotation[toIndex(3, 0, 0)][toIndex(3, 0, 0)] = 0
-
-        rotation[toIndex(3, 0, 1)][toIndex(4, 0, 1)] = 1
-        rotation[toIndex(3, 0, 1)][toIndex(3, 0, 1)] = 0
-
-        rotation[toIndex(3, 0, 2)][toIndex(4, 0, 2)] = 1
-        rotation[toIndex(3, 0, 2)][toIndex(3, 0, 2)] = 0
-
-        # Replace right with back
-        rotation[toIndex(4, 0, 0)][toIndex(5, 0, 0)] = 1
-        rotation[toIndex(4, 0, 0)][toIndex(4, 0, 0)] = 0
-
-        rotation[toIndex(4, 0, 1)][toIndex(5, 0, 1)] = 1
-        rotation[toIndex(4, 0, 1)][toIndex(4, 0, 1)] = 0
-
-        rotation[toIndex(4, 0, 2)][toIndex(5, 0, 2)] = 1
-        rotation[toIndex(4, 0, 2)][toIndex(4, 0, 2)] = 0
-
-        # Replace back with left
-        rotation[toIndex(5, 0, 0)][toIndex(2, 0, 0)] = 1
-        rotation[toIndex(5, 0, 0)][toIndex(5, 0, 0)] = 0
-
-        rotation[toIndex(5, 0, 1)][toIndex(2, 0, 1)] = 1
-        rotation[toIndex(5, 0, 1)][toIndex(5, 0, 1)] = 0
-
-        rotation[toIndex(5, 0, 2)][toIndex(2, 0, 2)] = 1
-        rotation[toIndex(5, 0, 2)][toIndex(5, 0, 2)] = 0
-    elif f == 1:
-        # Replace front with left
-        rotation[toIndex(3, 2, 0)][toIndex(2, 2, 0)] = 1
-        rotation[toIndex(3, 2, 0)][toIndex(3, 2, 0)] = 0
-
-        rotation[toIndex(3, 2, 1)][toIndex(2, 2, 1)] = 1
-        rotation[toIndex(3, 2, 1)][toIndex(3, 2, 1)] = 0
-
-        rotation[toIndex(3, 2, 2)][toIndex(2, 2, 2)] = 1
-        rotation[toIndex(3, 2, 2)][toIndex(3, 2, 2)] = 0
-
-        # Replace right with front
-        rotation[toIndex(4, 2, 0)][toIndex(3, 2, 0)] = 1
-        rotation[toIndex(4, 2, 0)][toIndex(4, 2, 0)] = 0
-
-        rotation[toIndex(4, 2, 1)][toIndex(3, 2, 1)] = 1
-        rotation[toIndex(4, 2, 1)][toIndex(4, 2, 1)] = 0
-
-        rotation[toIndex(4, 2, 2)][toIndex(3, 2, 2)] = 1
-        rotation[toIndex(4, 2, 2)][toIndex(4, 2, 2)] = 0
-
-        # Replace back with right
-        rotation[toIndex(5, 2, 0)][toIndex(4, 2, 0)] = 1
-        rotation[toIndex(5, 2, 0)][toIndex(5, 2, 0)] = 0
-
-        rotation[toIndex(5, 2, 1)][toIndex(4, 2, 1)] = 1
-        rotation[toIndex(5, 2, 1)][toIndex(5, 2, 1)] = 0
-
-        rotation[toIndex(5, 2, 2)][toIndex(4, 2, 2)] = 1
-        rotation[toIndex(5, 2, 2)][toIndex(5, 2, 2)] = 0
-
-        # Replace left with back
-        rotation[toIndex(2, 2, 0)][toIndex(5, 2, 0)] = 1
-        rotation[toIndex(2, 2, 0)][toIndex(2, 2, 0)] = 0
-
-        rotation[toIndex(2, 2, 1)][toIndex(5, 2, 1)] = 1
-        rotation[toIndex(2, 2, 1)][toIndex(2, 2, 1)] = 0
-
-        rotation[toIndex(2, 2, 2)][toIndex(5, 2, 2)] = 1
-        rotation[toIndex(2, 2, 2)][toIndex(2, 2, 2)] = 0
-    elif f == 2:
-        # Replace front with top
-        rotation[toIndex(3, 0, 0)][toIndex(0, 0, 0)] = 1
-        rotation[toIndex(3, 0, 0)][toIndex(3, 0, 0)] = 0
-
-        rotation[toIndex(3, 1, 0)][toIndex(0, 1, 0)] = 1
-        rotation[toIndex(3, 1, 0)][toIndex(3, 1, 0)] = 0
-
-        rotation[toIndex(3, 2, 0)][toIndex(0, 2, 0)] = 1
-        rotation[toIndex(3, 2, 0)][toIndex(3, 2, 0)] = 0
-
-        # Replace bottom with front
-        rotation[toIndex(1, 0, 0)][toIndex(3, 0, 0)] = 1
-        rotation[toIndex(1, 0, 0)][toIndex(1, 0, 0)] = 0
-
-        rotation[toIndex(1, 1, 0)][toIndex(3, 1, 0)] = 1
-        rotation[toIndex(1, 1, 0)][toIndex(1, 1, 0)] = 0
-
-        rotation[toIndex(1, 2, 0)][toIndex(3, 2, 0)] = 1
-        rotation[toIndex(1, 2, 0)][toIndex(1, 2, 0)] = 0
-
-        # Replace back with bottom
-        rotation[toIndex(5, 0, 2)][toIndex(1, 2, 0)] = 1
-        rotation[toIndex(5, 0, 2)][toIndex(5, 0, 2)] = 0
-
-        rotation[toIndex(5, 1, 2)][toIndex(1, 1, 0)] = 1
-        rotation[toIndex(5, 1, 2)][toIndex(5, 1, 2)] = 0
-
-        rotation[toIndex(5, 2, 2)][toIndex(1, 0, 0)] = 1
-        rotation[toIndex(5, 2, 2)][toIndex(5, 2, 2)] = 0
-
-        # Replace top with back
-        rotation[toIndex(0, 2, 0)][toIndex(5, 0, 2)] = 1
-        rotation[toIndex(0, 2, 0)][toIndex(0, 2, 0)] = 0
-
-        rotation[toIndex(0, 1, 0)][toIndex(5, 1, 2)] = 1
-        rotation[toIndex(0, 1, 0)][toIndex(0, 1, 0)] = 0
-
-        rotation[toIndex(0, 0, 0)][toIndex(5, 2, 2)] = 1
-        rotation[toIndex(0, 0, 0)][toIndex(0, 0, 0)] = 0
-    elif f == 3:
-        # Replace top with left
-        rotation[toIndex(0, 2, 0)][toIndex(2, 2, 2)] = 1  # Add the 1 that does the operation
-        rotation[toIndex(0, 2, 0)][toIndex(0, 2, 0)] = 0  # Remove the 1 from the identity matrix prior
-
-        rotation[toIndex(0, 2, 1)][toIndex(2, 1, 2)] = 1
-        rotation[toIndex(0, 2, 1)][toIndex(0, 2, 1)] = 0
-
-        rotation[toIndex(0, 2, 2)][toIndex(2, 0, 2)] = 1
-        rotation[toIndex(0, 2, 2)][toIndex(0, 2, 2)] = 0
-
-        # Replace right with top
-        rotation[toIndex(4, 0, 0)][toIndex(0, 2, 0)] = 1
-        rotation[toIndex(4, 0, 0)][toIndex(4, 0, 0)] = 0
-
-        rotation[toIndex(4, 1, 0)][toIndex(0, 2, 1)] = 1
-        rotation[toIndex(4, 1, 0)][toIndex(4, 1, 0)] = 0
-
-        rotation[toIndex(4, 2, 0)][toIndex(0, 2, 2)] = 1
-        rotation[toIndex(4, 2, 0)][toIndex(4, 2, 0)] = 0
-
-        # Replace bottom with right
-        rotation[toIndex(1, 0, 2)][toIndex(4, 0, 0)] = 1
-        rotation[toIndex(1, 0, 2)][toIndex(1, 0, 2)] = 0
-
-        rotation[toIndex(1, 0, 1)][toIndex(4, 1, 0)] = 1
-        rotation[toIndex(1, 0, 1)][toIndex(1, 0, 1)] = 0
-
-        rotation[toIndex(1, 0, 0)][toIndex(4, 2, 0)] = 1
-        rotation[toIndex(1, 0, 0)][toIndex(1, 0, 0)] = 0
-
-        # Replace left with bottom
-        rotation[toIndex(2, 2, 2)][toIndex(1, 0, 2)] = 1
-        rotation[toIndex(2, 2, 2)][toIndex(2, 2, 2)] = 0
-
-        rotation[toIndex(2, 1, 2)][toIndex(1, 0, 1)] = 1
-        rotation[toIndex(2, 1, 2)][toIndex(2, 1, 2)] = 0
-
-        rotation[toIndex(2, 0, 2)][toIndex(1, 0, 0)] = 1
-        rotation[toIndex(2, 0, 2)][toIndex(2, 0, 2)] = 0
-    elif f == 4:
-        # Replace top with front
-        rotation[toIndex(0, 0, 2)][toIndex(3, 0, 2)] = 1
-        rotation[toIndex(0, 0, 2)][toIndex(0, 0, 2)] = 0
-
-        rotation[toIndex(0, 1, 2)][toIndex(3, 1, 2)] = 1
-        rotation[toIndex(0, 1, 2)][toIndex(0, 1, 2)] = 0
-
-        rotation[toIndex(0, 2, 2)][toIndex(3, 2, 2)] = 1
-        rotation[toIndex(0, 2, 2)][toIndex(0, 2, 2)] = 0
-
-        # Replace back with top
-        rotation[toIndex(5, 0, 0)][toIndex(0, 2, 2)] = 1
-        rotation[toIndex(5, 0, 0)][toIndex(5, 0, 0)] = 0
-
-        rotation[toIndex(5, 1, 0)][toIndex(0, 1, 2)] = 1
-        rotation[toIndex(5, 1, 0)][toIndex(5, 1, 0)] = 0
-
-        rotation[toIndex(5, 2, 0)][toIndex(0, 0, 2)] = 1
-        rotation[toIndex(5, 2, 0)][toIndex(5, 2, 0)] = 0
-
-        # Replace bottom with back
-        rotation[toIndex(1, 2, 2)][toIndex(5, 0, 0)] = 1
-        rotation[toIndex(1, 2, 2)][toIndex(1, 2, 2)] = 0
-
-        rotation[toIndex(1, 1, 2)][toIndex(5, 1, 0)] = 1
-        rotation[toIndex(1, 1, 2)][toIndex(1, 1, 2)] = 0
-
-        rotation[toIndex(1, 0, 2)][toIndex(5, 2, 0)] = 1
-        rotation[toIndex(1, 0, 2)][toIndex(1, 0, 2)] = 0
-
-        # Replace front with bottom
-        rotation[toIndex(3, 2, 2)][toIndex(1, 2, 2)] = 1
-        rotation[toIndex(3, 2, 2)][toIndex(3, 2, 2)] = 0
-
-        rotation[toIndex(3, 1, 2)][toIndex(1, 1, 2)] = 1
-        rotation[toIndex(3, 1, 2)][toIndex(3, 1, 2)] = 0
-
-        rotation[toIndex(3, 0, 2)][toIndex(1, 0, 2)] = 1
-        rotation[toIndex(3, 0, 2)][toIndex(3, 0, 2)] = 0
-    elif f == 5:
-        # Replace top with right
-        rotation[toIndex(0, 0, 0)][toIndex(4, 0, 2)] = 1
-        rotation[toIndex(0, 0, 0)][toIndex(0, 0, 0)] = 0
-
-        rotation[toIndex(0, 0, 1)][toIndex(4, 1, 2)] = 1
-        rotation[toIndex(0, 0, 1)][toIndex(0, 0, 1)] = 0
-
-        rotation[toIndex(0, 0, 2)][toIndex(4, 2, 2)] = 1
-        rotation[toIndex(0, 0, 2)][toIndex(0, 0, 2)] = 0
-
-        # Replace right with bottom
-        rotation[toIndex(4, 0, 2)][toIndex(1, 2, 2)] = 1
-        rotation[toIndex(4, 0, 2)][toIndex(4, 0, 2)] = 0
-
-        rotation[toIndex(4, 1, 2)][toIndex(1, 2, 1)] = 1
-        rotation[toIndex(4, 1, 2)][toIndex(4, 1, 2)] = 0
-
-        rotation[toIndex(4, 2, 2)][toIndex(1, 2, 0)] = 1
-        rotation[toIndex(4, 2, 2)][toIndex(4, 2, 2)] = 0
-
-        # Replace bottom with left
-        rotation[toIndex(1, 2, 2)][toIndex(2, 2, 0)] = 1
-        rotation[toIndex(1, 2, 2)][toIndex(1, 2, 2)] = 0
-
-        rotation[toIndex(1, 2, 1)][toIndex(2, 1, 0)] = 1
-        rotation[toIndex(1, 2, 1)][toIndex(1, 2, 1)] = 0
-
-        rotation[toIndex(1, 2, 0)][toIndex(2, 0, 0)] = 1
-        rotation[toIndex(1, 2, 0)][toIndex(1, 2, 0)] = 0
-
-        # Replace left with top
-        rotation[toIndex(2, 2, 0)][toIndex(0, 0, 0)] = 1
-        rotation[toIndex(2, 2, 0)][toIndex(2, 2, 0)] = 0
-
-        rotation[toIndex(2, 1, 0)][toIndex(0, 0, 1)] = 1
-        rotation[toIndex(2, 1, 0)][toIndex(2, 1, 0)] = 0
-
-        rotation[toIndex(2, 0, 0)][toIndex(0, 0, 2)] = 1
-        rotation[toIndex(2, 0, 0)][toIndex(2, 0, 0)] = 0
-
-    rotationMatrices[f] = rotation
-    rotationMatrices[-f - 1] = np.dot(rotation, np.dot(rotation, rotation))
-
-def rotate(arr, f):
-    return np.dot(rotationMatrices[f], arr)
-
-def print(self):
-    for i in range(6):
-        printFace(self.getFace(i))
-        print()
-
-def __str__(self):
-    out = ""
-    for f in range(6):
-        for i in range(3):
-            out += str(self.getFace(f)[i * 3:i * 3 + 3])
-            out += "\n"
-        out += "\n"
-    return out
-
-def printFace(v):
-    for i in range(3):
-        print(v[i * 3:i * 3 + 3])
-
-def apply_algo(algo, r):
-    new_r = r
-    for i in algo:
-        new_r = rotate(new_r, i)
-    return new_r
-
-
-def stringify_algo(algo: list):
-    return ";".join(algo)
-
-def unstringify_algo(algo: str):
-    return algo.split(";")
-
-#out = ""
-#for i in self.data:
-#    if i == 0:
-#        out += 'u'
-#    elif i == -1:
-#        out += 'U'
-#    elif i == 1:
-#        out += 'd'
-#    elif i == -2:
-#        out += 'D'
-#    elif i == 2:
-#        out += 'l'
-#    elif i == -3:
-#        out += 'L'
-#    elif i == 3:
-#        out += 'f'
-#    elif i == -4:
-#        out += 'F'
-#    elif i == 4:
-#        out += 'r'
-#    elif i == -5:
-#        out += 'R'
-#    elif i == 5:
-#        out += 'b'
-#    elif i == -6:
-#        out += 'B'
-#    out += " "
-#return out
-
-def randomAlgorithm(size):
-    return [r.randint(-6, 5) for _ in range(size)]
+"""
+abc    zda
+def -> yeb
+zyx    xfc
+"""
+c = np.array([[0,0,0,0,0,0,1,0,0],
+              [0,0,0,1,0,0,0,0,0],
+              [1,0,0,0,0,0,0,0,0],
+              [0,0,0,0,0,0,0,1,0],
+              [0,0,0,0,1,0,0,0,0],
+              [0,1,0,0,0,0,0,0,0],
+              [0,0,0,0,0,0,0,0,1],
+              [0,0,0,0,0,1,0,0,0],
+              [0,0,1,0,0,0,0,0,0]])
+
+z = np.zeros((9, 9), dtype=int)
+i = np.identity(9, dtype=int)
+
+r = [None] * 12
+a = np.diag([1,1,1,0,0,0,0,0,0]) # copy top
+b = i - a # copy not top
+r[0] = concat([[c,z,z,z,z,z],
+                [z,i,z,z,z,z],
+                [z,z,b,a,z,z],
+                [z,z,z,b,a,z],
+                [z,z,z,z,b,a],
+                [z,z,a,z,z,b]])
+
+a = np.diag([0,0,0,0,0,0,1,1,1]) # copy bottom
+b = i - a # copy not bottom
+r[1] = concat([[i,z,z,z,z,z],
+               [z,c,z,z,z,z],
+               [z,z,b,z,z,a],
+               [z,z,a,b,z,z],
+               [z,z,z,a,b,z],
+               [z,z,z,z,a,b]])
+
+a = np.diag([1,0,0,1,0,0,1,0,0]) # copy left
+b = i - a # copy not left
+d = np.flip(np.diag([1,0,0,1,0,0,1,0,0]), axis=1) # right to left
+e = np.diag([1,1,0,1,1,0,1,1,0]) # copy not right
+f = np.flip(np.diag([1,0,0,1,0,0,1,0,0]), axis=0) # left to right
+r[2] = concat([[b,z,z,z,z,d],
+               [z,b,z,a,z,z],
+               [z,z,c,z,z,z],
+               [a,z,z,b,z,z],
+               [z,z,z,z,i,z],
+               [z,f,z,z,z,e]])
+
+a = np.vstack([np.zeros([6, 9]), c[-3:]]) # right to bottom
+b = np.hstack([np.zeros([9, 6]), c[:, -3:]]) # bottom to left
+d = np.vstack([c[:3], np.zeros([6, 9])]) # left to top
+e = np.hstack([c[:, :3], np.zeros([9, 6])])# top to right
+
+f = np.diag([0,1,1,0,1,1,0,1,1])# not left
+g = np.diag([1,1,0,1,1,0,1,1,0])# not right
+h = np.diag([0,0,0,1,1,1,1,1,1])# not top
+j = np.diag([1,1,1,1,1,1,0,0,0])# not bottom
+
+r[3] = concat([[j,z,a,z,z,z],
+               [z,h,z,z,d,z],
+               [z,e,g,z,z,z],
+               [z,z,z,c,z,z],
+               [b,z,z,z,f,z],
+               [z,z,z,z,z,i]])
+
+a = np.diag([0,0,1,0,0,1,0,0,1]) # copy right
+b = np.diag([1,1,0,1,1,0,1,1,0]) # not right
+d = np.flip(np.diag([1,0,0,1,0,0,1,0,0]), axis=0) # left to right
+e = np.flip(np.diag([1,0,0,1,0,0,1,0,0]), axis=1) # right to left
+f = np.diag([0,1,1,0,1,1,0,1,1]) # not left
+
+r[4] = concat([[b,z,z,a,z,z],
+               [z,b,z,z,z,d],
+               [z,z,i,z,z,z],
+               [z,a,z,b,z,z],
+               [z,z,z,z,c,z],
+               [e,z,z,z,z,f]])
+
+k = np.dot(c, np.dot(c, c))
+
+a = np.vstack([np.zeros([6, 9]), k[-3:]]) # left to bottom
+b = np.hstack([np.zeros([9, 6]), k[:, -3:]]) # bottom to right
+d = np.vstack([k[:3], np.zeros([6, 9])]) # right to top
+e = np.hstack([k[:, :3], np.zeros([9, 6])])# top to left
+
+f = np.diag([0,1,1,0,1,1,0,1,1])# not left
+g = np.diag([1,1,0,1,1,0,1,1,0])# not right
+h = np.diag([0,0,0,1,1,1,1,1,1])# not top
+j = np.diag([1,1,1,1,1,1,0,0,0])# not bottom
+
+r[5] = concat([[h,z,z,z,d,z],
+               [z,j,a,z,z,z],
+               [e,z,f,z,z,z],
+               [z,z,z,i,z,z],
+               [z,b,z,z,g,z],
+               [z,z,z,z,z,c]])
+
+for i in range(0, 6):
+    r[-i - 1] = np.dot(r[i], np.dot(r[i], r[i]))
