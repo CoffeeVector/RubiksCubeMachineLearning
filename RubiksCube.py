@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from typing import List
-import numpy as np 
+import numpy as np
 def concat(arr):
     return np.vstack([np.hstack(row) for row in arr])
 
