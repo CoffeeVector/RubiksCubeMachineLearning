@@ -2,6 +2,8 @@
 from typing import Dict
 import RubiksCube as rc
 import numpy as np
+import numpy.linalg
+import matplotlib.pyplot as plt
 import random as rand
 
 def random_algorithm(size):
@@ -31,8 +33,9 @@ for i in range(len(r) - 1):
             m[j + 1][j    ] = 1;
             sort_matrix = np.dot(m, sort_matrix)
             r = np.dot(m, r)
-print(r)
 
-np.set_printoptions(threshold=np.inf)
+print(np.linalg.det(sort_matrix))
+plt.imshow(sort_matrix)
 
-print("\n".join(["".join([str(e) for e in row]) for row in sort_matrix]))
+plt.show()
+
