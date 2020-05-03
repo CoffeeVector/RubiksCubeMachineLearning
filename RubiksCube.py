@@ -154,3 +154,60 @@ r[5] = concat([[h,z,z,z,d,z],
 
 for i in range(0, 6):
     r[-i - 1] = np.dot(r[i], np.dot(r[i], r[i]))
+
+# alternate move set
+
+# based on two moves (rotate top cw and ccw)
+# as well as 6 moves (orientation of the cube itself)
+z = np.zeros((9, 9), dtype=int)
+i = np.identity(9, dtype=int)
+
+r2 = [None] * 12
+
+r2[0] = r[0]
+r2[-1] = r[-1]
+
+# pitch
+r2[1] = concat([[z,z,z,z,z,i],
+                [z,z,z,i,z,z],
+                [z,z,i,z,z,z],
+                [i,z,z,z,z,z],
+                [z,z,z,z,i,z],
+                [z,i,z,z,z,z]])
+# anti-pitch
+r2[-2] = concat([[z,z,z,i,z,z],
+                 [z,z,z,z,z,i],
+                 [z,z,i,z,z,z],
+                 [z,i,z,z,z,z],
+                 [z,z,z,z,i,z],
+                 [i,z,z,z,z,z]])
+
+# roll
+r2[2] = concat([[z,z,z,z,i,z],
+                [z,z,i,z,z,z],
+                [i,z,z,z,z,z],
+                [z,z,z,i,z,z],
+                [z,i,z,z,z,z],
+                [z,z,z,z,z,i]])
+# anti-roll
+r2[-3] = concat([[z,z,i,z,z,z],
+                 [z,z,z,z,i,z],
+                 [z,i,z,z,z,z],
+                 [z,z,z,i,z,z],
+                 [i,z,z,z,z,z],
+                 [z,z,z,z,z,i]])
+
+# yaw
+r2[3] = concat([[i,z,z,z,z,z],
+                [z,i,z,z,z,z],
+                [z,z,z,i,z,z],
+                [z,z,z,z,i,z],
+                [z,z,z,z,z,i],
+                [z,z,i,z,z,z]])
+# anti-yaw
+r2[-4] = concat([[i,z,z,z,z,z],
+                 [z,i,z,z,z,z],
+                 [z,z,z,z,z,i],
+                 [z,z,i,z,z,z],
+                 [z,z,z,i,z,z],
+                 [z,z,z,z,i,z]])
